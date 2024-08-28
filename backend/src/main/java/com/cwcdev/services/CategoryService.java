@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import com.cwcdev.dto.CategoryDTO;
 import com.cwcdev.entities.Category;
 import com.cwcdev.repositories.CategoryRepository;
+import com.cwcdev.services.exceptions.ResourceNotFoundException;
 
 @Service
 public class CategoryService {
@@ -27,8 +28,8 @@ public class CategoryService {
 	@org.springframework.transaction.annotation.Transactional(readOnly = true)
 	public CategoryDTO findById(Long id) {
 		Optional<Category> obj =   repository.findById(id);
-		Category entity = obj.get();
-		return new CategoryDTO(entity);
+		Category entity = obj.orElseThrow(()-> new ResourceNotFoundException("Entity not found")); 
+				return new CategoryDTO(entity);
 	}
 
 }
