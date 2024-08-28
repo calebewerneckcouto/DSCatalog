@@ -12,6 +12,8 @@ import com.cwcdev.entities.Category;
 import com.cwcdev.repositories.CategoryRepository;
 import com.cwcdev.services.exceptions.ResourceNotFoundException;
 
+import jakarta.validation.Valid;
+
 @Service
 public class CategoryService {
 	
@@ -30,6 +32,13 @@ public class CategoryService {
 		Optional<Category> obj =   repository.findById(id);
 		Category entity = obj.orElseThrow(()-> new ResourceNotFoundException("Entity not found")); 
 				return new CategoryDTO(entity);
+	}
+	public CategoryDTO insert(CategoryDTO dto) {
+		Category entity = new Category();
+		entity.setName(dto.getName());
+		entity = repository.save((entity));
+		return new CategoryDTO(entity);
+		
 	}
 
 }
