@@ -2,6 +2,8 @@ package com.cwcdev.resources;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
@@ -22,6 +24,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import com.cwcdev.dto.ProductDTO;
 import com.cwcdev.factory.Factory;
 import com.cwcdev.services.ProductService;
+import com.cwcdev.services.exceptions.DatabaseException;
 import com.cwcdev.services.exceptions.ResourceNotFoundException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -57,12 +60,14 @@ public class ProductResourceTests {
 
 	private long existingId;
 	private long nonexistingId;
+	private long dependedId;
 
 	@BeforeEach
 	void setup() throws Exception {
 
 		existingId = 1L;
 		nonexistingId = 2L;
+		dependedId = 3L;
 		dto = Factory.createProductDTO();
 		page = new PageImpl<>(List.of(dto));
 		when(productService.findAllPaged(any())).thenReturn(page);
@@ -72,7 +77,10 @@ public class ProductResourceTests {
 
 		when(productService.update(eq(existingId), any())).thenReturn(dto);
 		when(productService.update(eq(nonexistingId), any())).thenThrow(ResourceNotFoundException.class);
-
+		
+		doNothing().when(productService).delete(existingId);
+        doThrow(ResourceNotFoundException.class).when(productService).delete(nonexistingId);
+        doThrow(DatabaseException.class).when(productService).delete(dependedId);
 	}
 
 	@Test
