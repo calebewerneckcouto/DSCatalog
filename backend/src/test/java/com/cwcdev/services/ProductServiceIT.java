@@ -5,9 +5,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 
+import com.cwcdev.dto.ProductDTO;
 import com.cwcdev.repositories.ProductRepository;
 import com.cwcdev.services.exceptions.ResourceNotFoundException;
+
+import jakarta.transaction.Transactional;
 
 /*
  * @SpringBootTest   -   Carrega contexto da aplicação (teste de integração)
@@ -26,6 +32,7 @@ import com.cwcdev.services.exceptions.ResourceNotFoundException;
  * */
 
 @SpringBootTest
+@Transactional
 public class ProductServiceIT {
 	@Autowired
 	private ProductService service;
@@ -61,4 +68,48 @@ public class ProductServiceIT {
 		});
 	}
 
+	@Test
+	public void findAllpagedShouldReturnPageWhenPage0Size10() {
+
+		PageRequest pageRequest = PageRequest.of(0, 10);
+		Page<ProductDTO> result = service.findAllPaged(pageRequest);
+		
+		Assertions.assertFalse(result.isEmpty());
+		Assertions.assertEquals(0,result.getNumber());
+		Assertions.assertEquals(10,result.getSize());
+		Assertions.assertEquals(countTotalProducts,result.getTotalElements());
+		
+	}
+	
+	
+	@Test
+	public void findAllpagedShouldReturnEmptyPageWhenPageDoesnotExist() {
+
+		PageRequest pageRequest = PageRequest.of(50, 10);
+		Page<ProductDTO> result = service.findAllPaged(pageRequest);
+		
+		Assertions.assertTrue(result.isEmpty());
+		
+		
+	}
+	
+	
+	
+	@Test
+	public void findAllpagedShouldReturnSortedPageWhenSortByName() {
+
+		PageRequest pageRequest = PageRequest.of(0, 10,Sort.by("name"));
+		Page<ProductDTO> result = service.findAllPaged(pageRequest);
+		
+		Assertions.assertFalse(result.isEmpty());
+		Assertions.assertEquals("Macbook Pro",result.getContent().get(0).getName());
+		Assertions.assertEquals("PC Gamer",result.getContent().get(1).getName());
+		Assertions.assertEquals("PC Gamer Alfa",result.getContent().get(2).getName());
+		
+		
+	}
+	
+	
+	
+	
 }
