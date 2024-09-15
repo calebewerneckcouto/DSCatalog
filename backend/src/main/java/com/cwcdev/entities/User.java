@@ -6,6 +6,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -26,7 +27,7 @@ public class User implements Serializable {
 	private String email;
 	private String password;
 	/*Declarar coleção de categorias  usando SET ( conjunto nao aceita repetições)*/
-	@ManyToMany
+	@ManyToMany(fetch = FetchType.EAGER)//obriga trazer os roles quando utiliza o EAGER
 	@JoinTable(name = "tb_user_role",
 	joinColumns = @JoinColumn(name="user_id"),
 	inverseJoinColumns = @JoinColumn(name="role_id"))
