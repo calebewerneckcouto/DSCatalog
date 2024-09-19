@@ -2,6 +2,7 @@ package com.cwcdev.services;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -108,21 +109,22 @@ public class UserService implements UserDetailsService {
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		List<UserDetailsProjection> result = repository.searchUserAndRolesByEmail(username);
+	    List<UserDetailsProjection> result = repository.searchUserAndRolesByEmail(username);
 
-		if (result.size() == 0) {
+	    if (result.isEmpty()) {
+	        throw new UsernameNotFoundException("User not found");
+	    }
 
-			throw new UsernameNotFoundException("User not found");
-		}
+	    String password = result.get(0).getPassword();
+	    List<String> authorities = result.stream()
+	        .map(projection -> projection.getAuthority())
+	        .collect(Collectors.toList());
 
-		User user = new User();
-		user.setEmail(username);
-		user.setPassword(result.get(0).getPassword());
-
-		for (UserDetailsProjection projection : result) {
-			user.addRole(new Role(projection.getRoleId(), projection.getAuthority()));
-		}
-
-		return (UserDetails) user;
+	    return org.springframework.security.core.userdetails.User.builder()
+	        .username(username)
+	        .password(password)
+	        .authorities(authorities.toArray(new String[0]))
+	        .build();
 	}
+
 }
