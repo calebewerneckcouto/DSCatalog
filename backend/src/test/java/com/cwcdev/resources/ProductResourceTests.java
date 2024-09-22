@@ -15,17 +15,21 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
+import com.cwcdev.config.AppConfig;
 import com.cwcdev.dto.ProductDTO;
 import com.cwcdev.factory.Factory;
 import com.cwcdev.services.ProductService;
 import com.cwcdev.services.exceptions.DatabaseException;
 import com.cwcdev.services.exceptions.ResourceNotFoundException;
+import com.fasterxml.jackson.annotation.JacksonInject.Value;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /*
@@ -43,7 +47,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * 
  * @DataJpaTest   -  Carrega somente os componentes relacionandos ao Spring Data Jpa. Cada teste é transacional e dá rollback ao final ( teste de unidade: repository)
  * */
-@WebMvcTest(ProductResource.class)
+@WebMvcTest(value = ProductResource.class, excludeAutoConfiguration = { SecurityAutoConfiguration.class })
+@Import(AppConfig.class) // Import your AppConfig here
 public class ProductResourceTests {
 
 	@Autowired
@@ -77,10 +82,10 @@ public class ProductResourceTests {
 
 		when(productService.update(eq(existingId), any())).thenReturn(dto);
 		when(productService.update(eq(nonexistingId), any())).thenThrow(ResourceNotFoundException.class);
-		
+
 		doNothing().when(productService).delete(existingId);
-        doThrow(ResourceNotFoundException.class).when(productService).delete(nonexistingId);
-        doThrow(DatabaseException.class).when(productService).delete(dependedId);
+		doThrow(ResourceNotFoundException.class).when(productService).delete(nonexistingId);
+		doThrow(DatabaseException.class).when(productService).delete(dependedId);
 	}
 
 	@Test
@@ -126,13 +131,13 @@ public class ProductResourceTests {
 
 	@Test
 	public void updateShouldreturnNotFoundWhenIdDoesNotExists() throws Exception {
-		
+
 		String jsonBody = mapper.writeValueAsString(dto);
 
 		ResultActions result = mockMvc.perform(put("/products/{id}", nonexistingId).content(jsonBody)
 				.contentType(org.springframework.http.MediaType.APPLICATION_JSON)
 				.accept(org.springframework.http.MediaType.APPLICATION_JSON));
-		
+
 		result.andExpect(status().isNotFound());
 	}
 }
