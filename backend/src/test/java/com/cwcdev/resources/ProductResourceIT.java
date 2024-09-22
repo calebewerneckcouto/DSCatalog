@@ -19,6 +19,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import com.cwcdev.dto.ProductDTO;
 import com.cwcdev.factory.Factory;
 import com.cwcdev.services.ProductService;
+import com.cwcdev.tests.TokenUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import jakarta.transaction.Transactional;
@@ -50,10 +51,15 @@ public class ProductResourceIT {
 	
 	@Autowired
 	private ObjectMapper mapper;
+	
+	@Autowired
+	private TokenUtil tokenUtil;
 
 	private long existingId;
 	private long nonexistingId;
 	private long countTotalProducts;
+	private String username, password, bearerToken;
+	
 
 	@BeforeEach
 	void setup() throws Exception {
@@ -61,6 +67,10 @@ public class ProductResourceIT {
 		existingId = 1L;
 		nonexistingId = 1000L;
 		countTotalProducts = 25;
+		username = "calebewerneck@gmail.com";
+		password = "123456";
+		
+		bearerToken = tokenUtil.obtainAccessToken(mockMvc, username, password);
 		
 	}
 	
@@ -90,7 +100,9 @@ public class ProductResourceIT {
 		
 		String expectedDescription = dto.getDescription();
 
-		ResultActions result = mockMvc.perform(put("/products/{id}", existingId).content(jsonBody)
+		ResultActions result = mockMvc.perform(put("/products/{id}", existingId)
+				.header("Authorization", "Bearer " + bearerToken)
+				.content(jsonBody)
 				.contentType(org.springframework.http.MediaType.APPLICATION_JSON)
 				.accept(org.springframework.http.MediaType.APPLICATION_JSON));
 
@@ -109,7 +121,9 @@ public class ProductResourceIT {
 		
 		
 
-		ResultActions result = mockMvc.perform(put("/products/{id}", nonexistingId).content(jsonBody)
+		ResultActions result = mockMvc.perform(put("/products/{id}", nonexistingId)
+				.header("Authorization", "Bearer " + bearerToken)
+				.content(jsonBody)
 				.contentType(org.springframework.http.MediaType.APPLICATION_JSON)
 				.accept(org.springframework.http.MediaType.APPLICATION_JSON));
 
