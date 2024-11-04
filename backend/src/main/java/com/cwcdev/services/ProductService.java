@@ -1,5 +1,6 @@
 package com.cwcdev.services;
 
+import java.util.Arrays;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +15,7 @@ import com.cwcdev.dto.CategoryDTO;
 import com.cwcdev.dto.ProductDTO;
 import com.cwcdev.entities.Category;
 import com.cwcdev.entities.Product;
+import com.cwcdev.projetctions.ProductProjection;
 import com.cwcdev.repositories.CategoryRepository;
 import com.cwcdev.repositories.ProductRepository;
 import com.cwcdev.services.exceptions.DatabaseException;
@@ -93,6 +95,12 @@ public class ProductService {
 
 		}
 
+	}
+	
+	@Transactional(readOnly = true)
+	public Page<ProductProjection> testQuery(Pageable pageable) {
+		
+		return repository.searchProducts(Arrays.asList(1L,3L), "", pageable);
 	}
 
 }
