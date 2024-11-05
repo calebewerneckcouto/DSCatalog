@@ -23,6 +23,7 @@ import com.cwcdev.repositories.CategoryRepository;
 import com.cwcdev.repositories.ProductRepository;
 import com.cwcdev.services.exceptions.DatabaseException;
 import com.cwcdev.services.exceptions.ResourceNotFoundException;
+import com.cwcdev.util.Utils;
 
 import jakarta.persistence.EntityNotFoundException;
 
@@ -107,10 +108,11 @@ public class ProductService {
 		if (!"0".equals(categoryId)) {
 			categoryIds = Arrays.asList(categoryId.split(",")).stream().map(Long::parseLong).toList();
 		}
-		Page<ProductProjection> page = repository.searchProducts(categoryIds, name, pageable);
+		Page<ProductProjection> page = repository.searchProducts(categoryIds, name.trim(), pageable);
 		List<Long> productIds = page.map(x -> x.getId()).toList();
 
 		List<Product> entities = repository.searchProductsWithCategories(productIds);
+		entities = Utils.replace(page.getContent(),entities);
 		List<ProductDTO> dtos = entities.stream().map(p -> new ProductDTO(p, p.getCategories())).toList();
 		
 		Page<ProductDTO> pageDto = new PageImpl<ProductDTO>(dtos, page.getPageable(),page.getTotalElements());
