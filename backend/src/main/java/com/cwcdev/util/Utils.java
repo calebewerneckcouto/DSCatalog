@@ -5,21 +5,21 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.cwcdev.entities.Product;
-import com.cwcdev.projetctions.ProductProjection;
+import com.cwcdev.projetctions.IdProjection;
 
 public class Utils {
 
-	public static List<Product> replace(List<ProductProjection> ordered, List<Product> unoredered) {
+	public static <ID> List<? extends IdProjection<ID>> replace(List<? extends IdProjection<ID>> ordered,
+			List<? extends IdProjection<ID>> unoredered) {
 
-		Map<Long, Product> map = new HashMap<Long, Product>();
+		Map<ID, IdProjection<ID>> map = new HashMap<>();
 
-		for (Product obj : unoredered) {
+		for (IdProjection<ID> obj : unoredered) {
 			map.put(obj.getId(), obj);
 		}
-		List<Product> result = new ArrayList<Product>();
+		List<IdProjection<ID>> result = new ArrayList<>();
 
-		for (ProductProjection obj : ordered) {
+		for (IdProjection<ID> obj : ordered) {
 			result.add(map.get(obj.getId()));
 		}
 
