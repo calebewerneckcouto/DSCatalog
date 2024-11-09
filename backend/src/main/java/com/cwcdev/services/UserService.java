@@ -41,6 +41,9 @@ public class UserService implements UserDetailsService {
 
 	@Autowired
 	private RoleRepository rolerepository;
+	
+	@Autowired
+	private AuthService authService;
 
 	@org.springframework.transaction.annotation.Transactional(readOnly = true)
 	public Page<UserDTO> findAllPaged(Pageable pageable) {
@@ -48,6 +51,16 @@ public class UserService implements UserDetailsService {
 		return list.map(x -> new UserDTO(x));
 
 	}
+	
+	
+	
+	
+	@org.springframework.transaction.annotation.Transactional(readOnly = true)
+	public UserDTO findMe() {
+		User entity = authService.authenticated();
+		return new UserDTO(entity);
+	}
+
 
 	@org.springframework.transaction.annotation.Transactional(readOnly = true)
 	public UserDTO findById(Long id) {
